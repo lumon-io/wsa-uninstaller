@@ -1,45 +1,94 @@
-# WSA Uninstaller
+# WSA Uninstaller v2.0
 
-Automated uninstallation script for Windows Subsystem for Android (WSA), including WSABuilds installations.
+Advanced uninstallation script for Windows Subsystem for Android (WSA), including WSABuilds and custom installations.
 
 ## Features
 
-- Automatically detects and uninstalls WSA
-- Stops running WSA processes
-- Optional backup of user data (userdata.vhdx)
-- Cleans up leftover folders
-- Administrator privilege handling
-- Support for both Microsoft Store and WSABuild installations
+- **Automatic Detection**: Finds WSA installations in common and custom locations
+- **Deep Scan Mode**: Searches all drives for WSA folders
+- **Interactive Mode**: Select which folders to remove
+- **Process Management**: Automatically stops running WSA processes
+- **Data Backup**: Optional backup of user data (userdata.vhdx)
+- **Registry Cleanup**: Removes WSA-related registry entries
+- **Custom Path Support**: Specify additional paths to check
+- **Multi-Installation Support**: Handles various WSA installation methods
 
 ## Usage
 
-### Basic Uninstall (No Backup)
+### Basic Uninstall (Quick Mode)
 ```batch
 uninstall-wsa.bat
 ```
 
-### Uninstall with Data Backup
+### Interactive Mode
+Let the script find WSA folders and choose which to remove:
+```batch
+uninstall-wsa.bat -interactive
+# or shorthand
+uninstall-wsa.bat -i
+```
+
+### Deep Scan Mode
+Perform a thorough scan of all drives for WSA installations:
+```batch
+uninstall-wsa.bat -scan
+```
+
+### Backup User Data
 ```batch
 uninstall-wsa.bat -backup
 ```
 
-Or run the PowerShell script directly:
-```powershell
-.\uninstall-wsa.ps1 -BackupData
+### Combined Options
+```batch
+# Interactive mode with backup and deep scan
+uninstall-wsa.bat -backup -scan -interactive
 ```
 
-## What Gets Removed
+### PowerShell Direct Usage
+```powershell
+# Basic
+.\uninstall-wsa.ps1
 
-1. Windows Subsystem for Android package
-2. WSA data folder at `%LOCALAPPDATA%\Packages\MicrosoftCorporationII.WindowsSubsystemForAndroid_8wekyb3d8bbwe`
-3. All WSA processes
+# With options
+.\uninstall-wsa.ps1 -BackupData -ScanForWSA -Interactive
+
+# Custom paths
+.\uninstall-wsa.ps1 -CustomPaths @("D:\MyWSA", "E:\AndroidSubsystem")
+```
+
+## What Gets Detected and Removed
+
+### Automatic Detection Locations
+- `%ProgramFiles%\WSA`
+- `%ProgramFiles%\WindowsSubsystemForAndroid`
+- `%USERPROFILE%\WSA`
+- `%USERPROFILE%\Downloads\WSA*`
+- `%USERPROFILE%\Desktop\WSA*`
+- Common drive roots (C:\WSA, D:\WSA, etc.)
+
+### Detection Criteria
+The script identifies WSA folders by looking for:
+- Install.ps1 files
+- Run.bat files
+- WsaClient.exe
+- Kernel files
+- MSIX packages
+
+### What Gets Cleaned
+1. Windows Subsystem for Android AppX package
+2. WSA data folder at `%LOCALAPPDATA%\Packages\`
+3. WSA installation folders (with user confirmation in interactive mode)
+4. Registry entries related to WSA
+5. Running WSA processes
 
 ## Data Backup
 
-If you use the `-backup` flag, your user data (userdata.vhdx) will be saved to:
-`%USERPROFILE%\Desktop\WSA_Backup\WSA_userdata_[timestamp].vhdx`
-
-This file can be restored if you reinstall WSA in the future.
+When using the `-backup` flag:
+- Location: `%USERPROFILE%\Desktop\WSA_Backup\`
+- Filename: `WSA_userdata_[timestamp].vhdx`
+- This file contains your Android apps and data
+- Can be restored when reinstalling WSA
 
 ## Requirements
 
@@ -47,11 +96,34 @@ This file can be restored if you reinstall WSA in the future.
 - PowerShell 5.0 or later
 - Administrator privileges (script will auto-elevate)
 
+## Command Line Options
+
+| Option | Description |
+|--------|-------------|
+| `-backup` | Backup user data before uninstalling |
+| `-scan` | Perform deep scan across all drives |
+| `-interactive` or `-i` | Interactive mode to select folders |
+| `-help` or `-?` | Show help message |
+
 ## Notes
 
-- The script will prompt you to manually delete the WSABuild extraction folder if applicable
-- Make sure to close all Android apps before running
-- The script will attempt to stop WSA automatically, but may require manual intervention if apps are unresponsive
+- The script automatically elevates to Administrator if needed
+- Close all Android apps before running
+- Deep scan mode may take several minutes on large drives
+- Interactive mode is recommended for custom installations
+- The script will not delete folders without confirmation in interactive mode
+
+## Troubleshooting
+
+If WSA processes won't stop:
+1. Close all Android apps manually
+2. Open Task Manager and end any WSA-related processes
+3. Run the script again
+
+If folders can't be deleted:
+1. Restart your computer
+2. Run the script again
+3. If issues persist, delete folders manually
 
 ## Credits
 
