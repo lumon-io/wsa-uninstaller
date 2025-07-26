@@ -1,143 +1,194 @@
-# WSA Uninstaller v2.1
+# WSAway - Windows Subsystem for Android Complete Removal Tool
 
-Advanced uninstallation script for Windows Subsystem for Android (WSA), including WSABuilds and custom installations.
+<p align="center">
+  <img src="https://img.shields.io/badge/version-3.0-blue.svg" alt="Version">
+  <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/PowerShell-5.0+-blue.svg" alt="PowerShell">
+</p>
 
-> **Important**: This script is designed to be safe and will NOT delete its own directory or any folder containing the uninstaller files.
+**WSAway** is a comprehensive removal tool for Windows Subsystem for Android (WSA) that ensures complete cleanup of all WSA components, including packages, folders, registry entries, firewall rules, and more.
 
-## Features
+## ✨ Features
 
-- **Self-Protection**: Will NOT delete its own directory or parent directory
-- **Automatic Detection**: Finds WSA installations in common and custom locations
-- **Deep Scan Mode**: Searches all drives for WSA folders
-- **Interactive Mode**: Select which folders to remove (with safety warnings)
-- **Process Management**: Automatically stops running WSA processes
-- **Data Backup**: Optional backup of user data (userdata.vhdx)
-- **Registry Cleanup**: Removes WSA-related registry entries
-- **Custom Path Support**: Specify additional paths to check
-- **Multi-Installation Support**: Handles various WSA installation methods
+### Core Features
+- 🛡️ **Self-Protection**: Never deletes its own directory or parent folders
+- 🎯 **Smart Detection**: Automatically finds WSA installations across your system
+- 🔍 **Deep Scan Mode**: Thoroughly searches all drives for WSA components
+- 💾 **Data Backup**: Backs up user data before removal (with restoration tool)
+- 🔄 **System Restore**: Creates restore points before making changes
+- 📝 **Detailed Logging**: Tracks all operations for troubleshooting
 
-## Usage
+### Advanced Cleanup
+- 🔥 **Firewall Rules**: Removes WSA-related Windows Firewall rules
+- 🚀 **Startup Entries**: Cleans Task Scheduler and registry startup items
+- 💻 **Hyper-V Settings**: Removes virtual switches and NAT configurations
+- 🔧 **Environment Variables**: Cleans PATH and other environment settings
+- 📁 **Registry Cleanup**: Removes all WSA-related registry entries
 
-### Basic Uninstall (Quick Mode)
+### User Experience
+- 🖥️ **GUI Mode**: User-friendly graphical interface for easy operation
+- 💬 **Interactive CLI**: Choose exactly what to remove
+- 🏃 **Dry Run Mode**: Preview changes without executing them
+- 🔄 **Update Checker**: Stay current with the latest version
+
+## 🚀 Quick Start
+
+### GUI Mode (Recommended for most users)
 ```batch
-uninstall-wsa.bat
+WSAway-GUI.bat
 ```
 
-### Interactive Mode
-Let the script find WSA folders and choose which to remove:
+### CLI Mode
 ```batch
-uninstall-wsa.bat -interactive
-# or shorthand
-uninstall-wsa.bat -i
+# Basic removal
+WSAway.bat
+
+# Interactive mode with backup
+WSAway.bat -Interactive -BackupData
+
+# Dry run to preview changes
+WSAway.bat -DryRun -ScanForWSA
+
+# Full cleanup with all options
+WSAway.bat -BackupData -CreateRestorePoint -CleanFirewall -CleanStartup -CleanHyperV
 ```
 
-### Deep Scan Mode
-Perform a thorough scan of all drives for WSA installations:
-```batch
-uninstall-wsa.bat -scan
-```
+## 📥 Installation
 
-### Backup User Data
-```batch
-uninstall-wsa.bat -backup
-```
+1. Download the latest release from [Releases](https://github.com/lumon-io/wsaway/releases)
+2. Extract to a folder (NOT inside your WSA installation directory)
+3. Run `WSAway-GUI.bat` for GUI or `WSAway.bat` for CLI
 
-### Combined Options
-```batch
-# Interactive mode with backup and deep scan
-uninstall-wsa.bat -backup -scan -interactive
-```
+## 🖼️ Screenshots
 
-### PowerShell Direct Usage
-```powershell
-# Basic
-.\uninstall-wsa.ps1
+### GUI Mode
+The graphical interface provides:
+- Real-time WSA status checking
+- Checkbox options for all features
+- Folder selection with safety warnings
+- Progress tracking and detailed logs
+- Multiple tabs for different functions
 
-# With options
-.\uninstall-wsa.ps1 -BackupData -ScanForWSA -Interactive
+### CLI Mode
+Command-line interface offers:
+- Full parameter control
+- Scriptable operations
+- Interactive folder selection
+- Colored output for clarity
 
-# Custom paths
-.\uninstall-wsa.ps1 -CustomPaths @("D:\MyWSA", "E:\AndroidSubsystem")
-```
-
-## What Gets Detected and Removed
-
-### Automatic Detection Locations
-- `%ProgramFiles%\WSA`
-- `%ProgramFiles%\WindowsSubsystemForAndroid`
-- `%USERPROFILE%\WSA`
-- `%USERPROFILE%\Downloads\WSA*`
-- `%USERPROFILE%\Desktop\WSA*`
-- Common drive roots (C:\WSA, D:\WSA, etc.)
-
-### Detection Criteria
-The script identifies WSA folders by looking for:
-- Install.ps1 files
-- Run.bat files
-- WsaClient.exe
-- Kernel files
-- MSIX packages
-
-### What Gets Cleaned
-1. Windows Subsystem for Android AppX package
-2. WSA data folder at `%LOCALAPPDATA%\Packages\`
-3. WSA installation folders (with user confirmation in interactive mode)
-4. Registry entries related to WSA
-5. Running WSA processes
-
-## Data Backup
-
-When using the `-backup` flag:
-- Location: `%USERPROFILE%\Desktop\WSA_Backup\`
-- Filename: `WSA_userdata_[timestamp].vhdx`
-- This file contains your Android apps and data
-- Can be restored when reinstalling WSA
-
-## Requirements
-
-- Windows 10/11
-- PowerShell 5.0 or later
-- Administrator privileges (script will auto-elevate)
-
-## Command Line Options
+## 📋 Command Line Options
 
 | Option | Description |
 |--------|-------------|
-| `-backup` | Backup user data before uninstalling |
-| `-scan` | Perform deep scan across all drives |
-| `-interactive` or `-i` | Interactive mode to select folders |
-| `-help` or `-?` | Show help message |
+| `-GUI` | Launch graphical interface |
+| `-BackupData` | Backup user data before removal |
+| `-BackupPath <path>` | Custom backup location |
+| `-ScanForWSA` | Deep scan all drives |
+| `-Interactive` | Interactive folder selection |
+| `-CreateRestorePoint` | Create system restore point |
+| `-CleanFirewall` | Remove firewall rules |
+| `-CleanStartup` | Remove startup entries |
+| `-CleanHyperV` | Clean Hyper-V settings |
+| `-DryRun` | Preview mode (no changes) |
+| `-CustomPaths <paths>` | Additional paths to check |
+| `-Help` | Show help information |
+| `-Version` | Show version number |
 
-## Safety Features
+## 🔄 Restoring Backed Up Data
 
-- **Self-Protection**: The script will never delete:
-  - The directory containing `uninstall-wsa.ps1`
-  - The parent directory of the uninstaller
-  - Any folder that contains the uninstaller files
-- **Interactive Warnings**: Folders containing the uninstaller are marked with ⚠️
-- **Smart Detection**: Only identifies folders with actual WSA installation files
+To restore your WSA data after reinstalling:
 
-## Notes
+```powershell
+.\WSAway-Restore.ps1 -BackupFile "C:\Path\To\Your\WSA_userdata_backup.vhdx"
+```
 
-- The script automatically elevates to Administrator if needed
-- Close all Android apps before running
-- Deep scan mode may take several minutes on large drives
-- Interactive mode is recommended for custom installations
-- The script will not delete folders without confirmation in interactive mode
-- Place the uninstaller in a separate folder from your WSA installation for best results
+## 🛡️ Safety Features
 
-## Troubleshooting
+1. **Self-Protection**: WSAway will never delete:
+   - Its own directory
+   - Parent directories
+   - Any folder containing WSAway files
 
-If WSA processes won't stop:
+2. **Smart Detection**: Only targets folders with actual WSA components:
+   - Install.ps1
+   - Run.bat
+   - WsaClient.exe
+   - Kernel files
+   - MSIX packages
+
+3. **Interactive Warnings**: Protected folders are clearly marked with ⚠️
+
+## 📁 What Gets Removed
+
+### Packages & Applications
+- Windows Subsystem for Android AppX package
+- All associated Android apps
+
+### Folders
+- `%LOCALAPPDATA%\Packages\MicrosoftCorporationII.WindowsSubsystemForAndroid_*`
+- WSA installation directories
+- Custom installation locations
+
+### System Components
+- Firewall rules for WSA
+- Scheduled tasks and startup entries
+- Hyper-V virtual switches for WSA
+- Environment variable entries
+- Registry keys related to WSA
+
+## 🔧 Requirements
+
+- Windows 10/11
+- PowerShell 5.0 or later
+- Administrator privileges
+- .NET Framework (for GUI mode)
+
+## 🐛 Troubleshooting
+
+### WSA processes won't stop
 1. Close all Android apps manually
-2. Open Task Manager and end any WSA-related processes
-3. Run the script again
+2. Open Task Manager and end WSA processes
+3. Run WSAway again
 
-If folders can't be deleted:
-1. Restart your computer
-2. Run the script again
-3. If issues persist, delete folders manually
+### Permission errors
+1. Ensure you're running as Administrator
+2. Close any programs accessing WSA folders
+3. Restart your computer if needed
 
-## Credits
+### Can't find WSA folders
+1. Use `-ScanForWSA` for deep scan
+2. Add custom paths with `-CustomPaths`
+3. Check the logs for scan results
 
-Based on the uninstallation documentation from [WSABuilds](https://github.com/MustardChef/WSABuilds)
+## 📝 Logs
+
+Logs are saved to:
+- `%USERPROFILE%\Desktop\WSAway_Logs\`
+- One log file per day
+- Detailed operation tracking
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file
+
+## 🙏 Credits
+
+- Based on [WSABuilds](https://github.com/MustardChef/WSABuilds) uninstallation documentation
+- Community feedback and contributions
+
+## 📞 Support
+
+- 🐛 Report issues: [GitHub Issues](https://github.com/lumon-io/wsaway/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/lumon-io/wsaway/discussions)
+- 📧 Email: support@wsaway.app (if applicable)
+
+---
+
+**⚠️ Disclaimer**: This tool makes system-level changes. Always backup important data and create a system restore point before use. Use at your own risk.
