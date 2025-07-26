@@ -1,0 +1,12 @@
+# Backup files
+*.vhdx
+WSA_Backup/
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# PowerShell
+*.ps1.bak
+*.log
