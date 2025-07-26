@@ -2,7 +2,7 @@
 :: Windows Subsystem for Android (WSA) Uninstaller Batch Wrapper
 :: This batch file launches the PowerShell uninstaller script
 
-echo Windows Subsystem for Android (WSA) Uninstaller v2.0
+echo Windows Subsystem for Android (WSA) Uninstaller v2.1
 echo ====================================================
 echo.
 

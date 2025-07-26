@@ -1,12 +1,15 @@
-# WSA Uninstaller v2.0
+# WSA Uninstaller v2.1
 
 Advanced uninstallation script for Windows Subsystem for Android (WSA), including WSABuilds and custom installations.
 
+> **Important**: This script is designed to be safe and will NOT delete its own directory or any folder containing the uninstaller files.
+
 ## Features
 
+- **Self-Protection**: Will NOT delete its own directory or parent directory
 - **Automatic Detection**: Finds WSA installations in common and custom locations
 - **Deep Scan Mode**: Searches all drives for WSA folders
-- **Interactive Mode**: Select which folders to remove
+- **Interactive Mode**: Select which folders to remove (with safety warnings)
 - **Process Management**: Automatically stops running WSA processes
 - **Data Backup**: Optional backup of user data (userdata.vhdx)
 - **Registry Cleanup**: Removes WSA-related registry entries
@@ -105,6 +108,15 @@ When using the `-backup` flag:
 | `-interactive` or `-i` | Interactive mode to select folders |
 | `-help` or `-?` | Show help message |
 
+## Safety Features
+
+- **Self-Protection**: The script will never delete:
+  - The directory containing `uninstall-wsa.ps1`
+  - The parent directory of the uninstaller
+  - Any folder that contains the uninstaller files
+- **Interactive Warnings**: Folders containing the uninstaller are marked with ⚠️
+- **Smart Detection**: Only identifies folders with actual WSA installation files
+
 ## Notes
 
 - The script automatically elevates to Administrator if needed
@@ -112,6 +124,7 @@ When using the `-backup` flag:
 - Deep scan mode may take several minutes on large drives
 - Interactive mode is recommended for custom installations
 - The script will not delete folders without confirmation in interactive mode
+- Place the uninstaller in a separate folder from your WSA installation for best results
 
 ## Troubleshooting
 

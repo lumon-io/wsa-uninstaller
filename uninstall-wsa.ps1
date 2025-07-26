@@ -9,8 +9,14 @@ param(
     [switch]$Interactive = $false
 )
 
-Write-Host "Windows Subsystem for Android (WSA) Uninstaller v2.0" -ForegroundColor Cyan
+Write-Host "Windows Subsystem for Android (WSA) Uninstaller v2.1" -ForegroundColor Cyan
 Write-Host "=====================================================" -ForegroundColor Cyan
+
+# Get the directory where this script is located
+$scriptDirectory = Split-Path -Parent $PSCommandPath
+$scriptParentDirectory = Split-Path -Parent $scriptDirectory
+
+Write-Host "Script running from: $scriptDirectory" -ForegroundColor Gray
 
 # Check if running as Administrator
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
@@ -58,6 +64,28 @@ function Test-WSARunning {
     return $false
 }
 
+# Function to check if a folder is safe to delete (not the uninstaller directory)
+function Test-SafeToDelete {
+    param($folderPath)
+    
+    # Normalize paths for comparison
+    $normalizedFolder = $folderPath.TrimEnd('\').ToLower()
+    $normalizedScript = $scriptDirectory.TrimEnd('\').ToLower()
+    $normalizedParent = $scriptParentDirectory.TrimEnd('\').ToLower()
+    
+    # Check if the folder is the script directory or its parent
+    if ($normalizedFolder -eq $normalizedScript -or $normalizedFolder -eq $normalizedParent) {
+        return $false
+    }
+    
+    # Check if the folder contains the uninstaller script
+    if (Test-Path (Join-Path $folderPath "uninstall-wsa.ps1")) {
+        return $false
+    }
+    
+    return $true
+}
+
 # Function to scan for WSA folders
 function Find-WSAFolders {
     Write-Host "`nScanning for WSA installation folders..." -ForegroundColor Yellow
@@ -68,11 +96,17 @@ function Find-WSAFolders {
         if ($path.Contains("*")) {
             $resolved = Get-Item -Path $path -ErrorAction SilentlyContinue
             if ($resolved) {
-                $foundPaths += $resolved.FullName
+                foreach ($item in $resolved) {
+                    if (Test-SafeToDelete $item.FullName) {
+                        $foundPaths += $item.FullName
+                    }
+                }
             }
         }
         elseif (Test-Path $path) {
-            $foundPaths += $path
+            if (Test-SafeToDelete $path) {
+                $foundPaths += $path
+            }
         }
     }
     
@@ -86,15 +120,26 @@ function Find-WSAFolders {
             $wsaFolders = Get-ChildItem -Path "$($drive.Name):\" -Directory -Recurse -ErrorAction SilentlyContinue |
                          Where-Object { $_.Name -like "*WSA*" -or $_.Name -like "*WindowsSubsystemForAndroid*" } |
                          Where-Object { 
-                             Test-Path (Join-Path $_.FullName "Install.ps1") -or
-                             Test-Path (Join-Path $_.FullName "Run.bat") -or
-                             Test-Path (Join-Path $_.FullName "WsaClient.exe") -or
-                             Test-Path (Join-Path $_.FullName "kernel") -or
-                             (Get-ChildItem -Path $_.FullName -Filter "*.msix" -ErrorAction SilentlyContinue).Count -gt 0
+                             # Check if it contains WSA installation files
+                             $hasWSAFiles = (Test-Path (Join-Path $_.FullName "Install.ps1") -or
+                                           Test-Path (Join-Path $_.FullName "Run.bat") -or
+                                           Test-Path (Join-Path $_.FullName "WsaClient.exe") -or
+                                           Test-Path (Join-Path $_.FullName "kernel") -or
+                                           (Get-ChildItem -Path $_.FullName -Filter "*.msix" -ErrorAction SilentlyContinue).Count -gt 0)
+                             
+                             # Make sure it's not just the uninstaller
+                             $isJustUninstaller = ((Get-ChildItem -Path $_.FullName -File -ErrorAction SilentlyContinue).Count -le 5 -and
+                                                 Test-Path (Join-Path $_.FullName "uninstall-wsa.ps1"))
+                             
+                             return $hasWSAFiles -and -not $isJustUninstaller
                          }
             
             if ($wsaFolders) {
-                $foundPaths += $wsaFolders.FullName
+                foreach ($folder in $wsaFolders) {
+                    if (Test-SafeToDelete $folder.FullName) {
+                        $foundPaths += $folder.FullName
+                    }
+                }
             }
         }
     }
@@ -113,6 +158,11 @@ function Select-WSAFolders {
     Write-Host "`nFound the following potential WSA folders:" -ForegroundColor Cyan
     for ($i = 0; $i -lt $folders.Count; $i++) {
         Write-Host "  [$($i + 1)] $($folders[$i])" -ForegroundColor White
+        
+        # Show warning if folder contains uninstaller
+        if (-not (Test-SafeToDelete $folders[$i])) {
+            Write-Host "       ⚠️  This folder contains the uninstaller script!" -ForegroundColor Yellow
+        }
     }
     Write-Host "  [A] Select all folders" -ForegroundColor Yellow
     Write-Host "  [N] None (skip folder cleanup)" -ForegroundColor Yellow
@@ -123,7 +173,8 @@ function Select-WSAFolders {
         return @()
     }
     elseif ($selection -eq 'A' -or $selection -eq 'a') {
-        return $folders
+        # Filter out unsafe folders even when selecting all
+        return $folders | Where-Object { Test-SafeToDelete $_ }
     }
     else {
         $selected = @()
@@ -132,7 +183,13 @@ function Select-WSAFolders {
             if ($index -match '^\d+$') {
                 $num = [int]$index - 1
                 if ($num -ge 0 -and $num -lt $folders.Count) {
-                    $selected += $folders[$num]
+                    $folderPath = $folders[$num]
+                    if (Test-SafeToDelete $folderPath) {
+                        $selected += $folderPath
+                    }
+                    else {
+                        Write-Host "Skipping $folderPath - contains uninstaller script" -ForegroundColor Yellow
+                    }
                 }
             }
         }
@@ -263,6 +320,12 @@ if ($selectedFolders.Count -gt 0) {
     Write-Host "`nRemoving WSA installation folders..." -ForegroundColor Yellow
     foreach ($folder in $selectedFolders) {
         if (Test-Path $folder) {
+            # Double-check safety before deletion
+            if (-not (Test-SafeToDelete $folder)) {
+                Write-Host "Skipping $folder - contains uninstaller script" -ForegroundColor Yellow
+                continue
+            }
+            
             try {
                 Remove-Item -Path $folder -Recurse -Force -ErrorAction Stop
                 Write-Host "Removed: $folder" -ForegroundColor Green
