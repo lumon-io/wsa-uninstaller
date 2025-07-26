@@ -187,7 +187,6 @@ MIT License - see [LICENSE](LICENSE) file
 
 - 🐛 Report issues: [GitHub Issues](https://github.com/lumon-io/wsaway/issues)
 - 💬 Discussions: [GitHub Discussions](https://github.com/lumon-io/wsaway/discussions)
-- 📧 Email: support@wsaway.app (if applicable)
 
 ---
 
